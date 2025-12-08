@@ -1,0 +1,95 @@
+.container {
+    padding: 1rem;
+}
+
+.header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.planName {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 0.5rem 0;
+}
+
+.meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.badge {
+    background-color: #f3f4f6;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+.exercisesList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.exerciseItem {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.exerciseHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.exerciseName {
+    font-weight: 600;
+    color: #374151;
+}
+
+.muscleBadge {
+    font-size: 0.75rem;
+    background-color: #e0e7ff;
+    color: #4338ca;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.statLabel {
+    color: #6b7280;
+    font-size: 0.75rem;
+    margin-bottom: 0.125rem;
+}
+
+.statValue {
+    font-weight: 500;
+    color: #111827;
+}
+
+.notes {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #e5e7eb;
+    font-size: 0.875rem;
+    color: #4b5563;
+    font-style: italic;
+}

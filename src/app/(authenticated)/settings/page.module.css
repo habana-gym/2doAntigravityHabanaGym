@@ -1,0 +1,66 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.section {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+}
+
+.sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--foreground);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+}
+
+.settingRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.settingRow:last-child {
+    border-bottom: none;
+}
+
+.settingInfo {
+    flex: 1;
+    padding-right: 2rem;
+}
+
+.settingLabel {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: var(--foreground);
+}
+
+.settingDesc {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.inputWrapper {
+    width: 120px;
+}
+
+.input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--background);
+    color: var(--foreground);
+    text-align: center;
+    font-size: 1rem;
+}

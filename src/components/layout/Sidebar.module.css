@@ -1,0 +1,104 @@
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background-color: var(--color-bg-card);
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    padding: 2rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    letter-spacing: 1px;
+}
+
+.logo span {
+    color: var(--color-primary);
+}
+
+.nav {
+    flex: 1;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-main);
+}
+
+.active {
+    background-color: var(--color-primary);
+    color: var(--color-bg-dark);
+}
+
+.active:hover {
+    background-color: var(--color-primary);
+    opacity: 0.9;
+}
+
+.icon {
+    margin-right: 0.75rem;
+    font-size: 1.2rem;
+}
+
+.footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    color: var(--color-bg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.userInfo {
+    flex: 1;
+}
+
+.userName {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-text-main);
+}
+
+.userRole {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}

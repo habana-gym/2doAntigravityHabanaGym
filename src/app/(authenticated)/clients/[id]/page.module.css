@@ -1,0 +1,173 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.headerActions {
+    display: flex;
+    gap: 1rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.profileCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+}
+
+.avatarLarge {
+    width: 100px;
+    height: 100px;
+    background-color: var(--color-primary);
+    color: var(--color-bg-dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.email {
+    color: var(--color-text-muted);
+}
+
+.statusBadge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.active {
+    background-color: rgba(0, 200, 81, 0.2);
+    color: #00C851;
+}
+
+.debtor {
+    background-color: rgba(255, 68, 68, 0.2);
+    color: #FF4444;
+}
+
+.inactive {
+    background-color: rgba(170, 170, 170, 0.2);
+    color: #AAAAAA;
+}
+
+.infoCard,
+.planCard,
+.statsCard {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.label {
+    color: var(--color-text-muted);
+}
+
+.value {
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.textDanger {
+    color: var(--color-danger);
+}
+
+.actions {
+    margin-top: auto;
+}
+
+.fullWidth {
+    width: 100%;
+}
+
+/* Updated Assign Section Styles */
+.assignContainer {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 1rem;
+}
+
+.assignLabel {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+.assignActions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    /* Key for responsiveness */
+}
+
+.select {
+    flex: 1;
+    min-width: 200px;
+    /* Prevent it from getting too small */
+    padding: 0.5rem;
+    border-radius: 8px;
+    background-color: var(--color-bg-dark);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-main);
+}
+
+/* Ensure button doesn't shrink awkwardly if flex overrides */
+.assignActions button {
+    white-space: nowrap;
+}
+
+.statsCard {
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.statItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.statNumber {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.statLabel {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}

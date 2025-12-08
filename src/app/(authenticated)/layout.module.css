@@ -1,0 +1,13 @@
+.container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--color-bg-dark);
+}
+
+.main {
+    flex: 1;
+    margin-left: 260px;
+    /* Sidebar width */
+    padding: 2rem;
+    overflow-y: auto;
+}

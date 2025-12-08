@@ -1,0 +1,184 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.subtitle {
+    color: var(--color-text-muted);
+}
+
+.filterCard {
+    padding: 1rem;
+}
+
+.filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.searchBox {
+    flex: 1;
+    min-width: 200px;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background-color: var(--color-bg-dark);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-main);
+    outline: none;
+}
+
+.searchInput:focus {
+    border-color: var(--color-primary);
+}
+
+.statusFilters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filterBtn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filterBtn:hover {
+    border-color: var(--color-text-main);
+    color: var(--color-text-main);
+}
+
+.activeFilter {
+    background-color: var(--color-primary);
+    color: var(--color-bg-dark);
+    border-color: var(--color-primary);
+    font-weight: 600;
+}
+
+.tableCard {
+    padding: 0;
+    overflow: hidden;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.table th {
+    padding: 1rem 1.5rem;
+    background-color: rgba(255, 255, 255, 0.02);
+    color: var(--color-text-muted);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-main);
+}
+
+.row:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.clientName {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--color-bg-dark);
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.name {
+    font-weight: 600;
+}
+
+.email {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.statusBadge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.active {
+    background-color: rgba(0, 200, 81, 0.1);
+    color: var(--color-success);
+}
+
+.debtor {
+    background-color: rgba(255, 68, 68, 0.1);
+    color: var(--color-danger);
+}
+
+.inactive {
+    background-color: rgba(170, 170, 170, 0.1);
+    color: var(--color-text-muted);
+}
+
+.textDanger {
+    color: var(--color-danger);
+    font-weight: 600;
+}
+
+.textSuccess {
+    color: var(--color-success);
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.actionBtn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}

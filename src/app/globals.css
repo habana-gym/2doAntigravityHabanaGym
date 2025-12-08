@@ -1,0 +1,56 @@
+:root {
+  --color-primary: #FFD700; /* Gold/Yellow */
+  --color-bg-dark: #121212; /* Deep Black */
+  --color-bg-card: #1E1E1E; /* Dark Grey */
+  --color-text-main: #FFFFFF;
+  --color-text-muted: #AAAAAA;
+  --color-danger: #FF4444;
+  --color-success: #00C851;
+  --color-border: #333333;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--color-text-main);
+  background: var(--color-bg-dark);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Utility Classes */
+.text-primary { color: var(--color-primary); }
+.text-muted { color: var(--color-text-muted); }
+.bg-card { background-color: var(--color-bg-card); }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+

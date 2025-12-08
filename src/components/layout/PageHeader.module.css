@@ -1,0 +1,88 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    gap: 1rem;
+}
+
+.textContainer {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    /* Ensure title has some space */
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.subtitle {
+    color: var(--color-text-muted);
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.centerBranding {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 1rem;
+    height: 100%;
+}
+
+.logo {
+    height: 120px;
+    /* Large but contained */
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.rightSide {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 200px;
+    /* Balance the left side */
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+@media (max-width: 900px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .textContainer,
+    .rightSide {
+        min-width: auto;
+        align-items: center;
+        width: 100%;
+    }
+
+    .rightSide {
+        justify-content: center;
+    }
+
+    .centerBranding {
+        padding: 0.5rem 0;
+    }
+
+    .logo {
+        height: 80px;
+    }
+}

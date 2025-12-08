@@ -1,0 +1,50 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.kpiGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.kpiCard {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.kpiLabel {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.kpiValue {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--foreground);
+}
+
+.chartCard {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    min-height: 400px;
+}
+
+.chartTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--foreground);
+}
