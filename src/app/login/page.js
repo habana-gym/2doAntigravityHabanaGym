@@ -35,9 +35,12 @@ export default function LoginPage() {
                 if (error) throw error;
 
                 // Check if user has MFA enabled
-                const { data: factors } = await supabase.auth.mfa.listFactors();
+                const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
+                if (factorsError) throw factorsError;
+
                 if (factors && factors.all) {
-                    const verifiedFactor = factors.all.find(f => f.status === 'verified' && f.factorType === 'totp');
+                    // Fix: Use correct property 'factor_type' (snake_case)
+                    const verifiedFactor = factors.all.find(f => f.status === 'verified' && f.factor_type === 'totp');
 
                     if (verifiedFactor) {
                         setFactorId(verifiedFactor.id);
@@ -71,15 +74,11 @@ export default function LoginPage() {
         } catch (err) {
             console.error(err);
             setError(err.message || 'Error al iniciar sesión');
-            // If error during MFA step, keep showing MFA input so they can retry
         } finally {
-            // Only reset loading if we are not waiting for MFA input
-            // If we just transitioned to needsMFA, we already set loading=false above
             if (!needsMFA || (needsMFA && error)) {
                 setLoading(false);
             }
-            // If we are in MFA mode and just tried to verify (and failed), we want loading false
-            if (needsMFA) setLoading(false);
+            if (needsMFA && !error) setLoading(false);
         }
     };
 

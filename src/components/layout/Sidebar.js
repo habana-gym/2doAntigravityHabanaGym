@@ -41,7 +41,24 @@ export default function Sidebar() {
                     <div className={styles.avatar}>A</div>
                     <div className={styles.userInfo}>
                         <p className={styles.userName}>Admin</p>
-                        <p className={styles.userRole}>Administrador</p>
+                        <button
+                            onClick={async () => {
+                                const { supabase } = await import('@/lib/supabase');
+                                await supabase.auth.signOut();
+                                window.location.href = '/login';
+                            }}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--color-danger)',
+                                cursor: 'pointer',
+                                fontSize: '0.8rem',
+                                padding: 0,
+                                textAlign: 'left'
+                            }}
+                        >
+                            Cerrar Sesión
+                        </button>
                     </div>
                 </div>
             </div>
