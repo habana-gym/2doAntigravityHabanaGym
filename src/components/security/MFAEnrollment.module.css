@@ -1,0 +1,52 @@
+.container {
+    padding: 1.5rem;
+    background-color: var(--color-bg-dark);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    margin-top: 1rem;
+}
+
+.title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--color-text-main);
+}
+
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.qrContainer {
+    display: flex;
+    justify-content: center;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.secretText {
+    font-family: monospace;
+    background: #333;
+    padding: 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+    margin: 0.5rem 0;
+    color: var(--color-text-code);
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.success {
+    color: var(--color-success);
+    text-align: center;
+    padding: 1rem;
+    background: rgba(0, 200, 81, 0.1);
+    border-radius: 8px;
+}
