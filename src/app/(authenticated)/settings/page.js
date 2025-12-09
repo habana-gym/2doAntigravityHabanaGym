@@ -14,6 +14,7 @@ export default function SettingsPage() {
     const [saving, setSaving] = useState(false);
 
     // Form states
+    const [graceDays, setGraceDays] = useState('5');
     const [factors, setFactors] = useState([]);
     const [showMFAEnroll, setShowMFAEnroll] = useState(false);
 
