@@ -13,6 +13,13 @@ export default function WorkoutDetails({ plan }) {
                 </div>
             </div>
 
+            {plan.description && (
+                <div style={{ padding: '1rem', backgroundColor: '#000', color: '#FFD700', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #333' }}>
+                    <strong style={{ display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Instrucciones / Método</strong>
+                    <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{plan.description}</p>
+                </div>
+            )}
+
             <div className={styles.exercisesList}>
                 {plan.plan_exercises && plan.plan_exercises.length > 0 ? (
                     plan.plan_exercises.map((pe) => (

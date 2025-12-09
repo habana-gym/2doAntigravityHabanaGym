@@ -19,6 +19,7 @@ export default function NewClientPage() {
         membershipType: '',
         startDate: new Date().toISOString().split('T')[0],
         planId: '',
+        medicalNotes: ''
     });
     const [fingerprintId, setFingerprintId] = useState('');
     const [fingerprintStep, setFingerprintStep] = useState(0); // 0: Idle, 1: First Scan, 2: Second Scan
@@ -145,7 +146,10 @@ export default function NewClientPage() {
                 end_date: end.toISOString().split('T')[0],
                 status: 'active',
                 debt: selectedMem ? selectedMem.price : 0,
-                plan_id: formData.planId || null
+                status: 'active',
+                debt: selectedMem ? selectedMem.price : 0,
+                plan_id: formData.planId || null,
+                medical_notes: formData.medicalNotes || null
             };
 
             await addClient(clientData);
@@ -211,6 +215,30 @@ export default function NewClientPage() {
                             onChange={handleChange}
                             error={errors.email}
                         />
+
+
+
+                        <div style={{ gridColumn: '1 / -1' }}>
+                            <label className={styles.label} style={{ marginBottom: '0.5rem', display: 'block' }}>Observaciones Médicas / Físicas</label>
+                            <textarea
+                                name="medicalNotes"
+                                value={formData.medicalNotes}
+                                onChange={handleChange}
+                                className=""
+                                placeholder="Ej: Lesión de rodilla, hipertensión, objetivos específicos..."
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    backgroundColor: 'var(--color-bg-surface, #1f2937)',
+                                    border: '1px solid var(--color-border, #374151)',
+                                    color: 'var(--color-text-main, #fff)',
+                                    height: '80px',
+                                    paddingTop: '0.5rem',
+                                    fontFamily: 'inherit'
+                                }}
+                            />
+                        </div>
 
                         {/* Fingerprint Capture Section */}
                         <div className={styles.fingerprintSection} style={{ gridColumn: '1 / -1', border: '1px solid var(--color-border)', padding: '1rem', borderRadius: '8px', marginTop: '1rem' }}>

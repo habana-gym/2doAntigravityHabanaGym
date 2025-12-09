@@ -224,6 +224,15 @@ export default function ClientDetailPage({ params }) {
                     <div className={`${styles.statusBadge} ${styles[client.status]}`}>
                         {client.status.toUpperCase()}
                     </div>
+
+                    <div style={{ marginTop: '1.5rem', width: '100%', textAlign: 'left', backgroundColor: '#000', color: '#FFD700', padding: '1rem', borderRadius: '8px', border: '1px solid #333' }}>
+                        <strong style={{ display: 'block', color: '#FFD700', marginBottom: '0.5rem', textTransform: 'uppercase', fontSize: '0.9rem' }}>⚠️ Observaciones Médicas</strong>
+                        {client.medical_notes ? (
+                            <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{client.medical_notes}</p>
+                        ) : (
+                            <p style={{ margin: 0, fontStyle: 'italic', opacity: 0.7 }}>Sin observaciones registradas.</p>
+                        )}
+                    </div>
                 </Card>
 
                 <Card title="Membresía" className={styles.infoCard}>

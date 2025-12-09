@@ -23,7 +23,8 @@ export default function EditClientPage({ params }) {
         email: '',
         phone: '',
         cedula: '',
-        notes: ''
+        notes: '',
+        medicalNotes: ''
     });
 
     // We don't necessarily need to edit Membership/Plan here as that's handled in the detail view actions usually, 
@@ -48,6 +49,7 @@ export default function EditClientPage({ params }) {
                     email: clientData.email || '',
                     phone: clientData.phone || '',
                     cedula: clientData.cedula || '',
+                    medicalNotes: clientData.medical_notes || ''
                 });
 
                 setExistingClients(allClients.filter(c => c.id !== id)); // Exclude self for duplicate check
@@ -100,6 +102,7 @@ export default function EditClientPage({ params }) {
                 email: formData.email || null,
                 phone: formData.phone,
                 cedula: formData.cedula,
+                medical_notes: formData.medicalNotes || null
             });
             alert('Cliente actualizado con éxito');
             router.push(`/clients/${id}`);
@@ -164,6 +167,26 @@ export default function EditClientPage({ params }) {
                             onChange={handleChange}
                             error={errors.email}
                         />
+
+                        <div style={{ gridColumn: '1 / -1' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Observaciones Médicas / Físicas</label>
+                            <textarea
+                                name="medicalNotes"
+                                value={formData.medicalNotes}
+                                onChange={handleChange}
+                                placeholder="Ej: Lesión de rodilla, hipertensión..."
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    backgroundColor: 'var(--color-bg-surface, #1f2937)',
+                                    border: '1px solid var(--color-border, #374151)',
+                                    color: 'var(--color-text-main, #fff)',
+                                    minHeight: '100px',
+                                    fontFamily: 'inherit'
+                                }}
+                            />
+                        </div>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>

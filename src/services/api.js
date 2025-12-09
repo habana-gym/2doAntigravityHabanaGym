@@ -255,7 +255,8 @@ export const addWorkoutPlan = async (plan) => {
         .insert([{
             name: plan.name,
             duration: plan.duration,
-            level: plan.level
+            level: plan.level,
+            description: plan.description
         }])
         .select()
         .single();
@@ -291,7 +292,8 @@ export const updateWorkoutPlan = async (id, planData) => {
         .update({
             name: planData.name,
             duration: planData.duration,
-            level: planData.level
+            level: planData.level,
+            description: planData.description
         })
         .eq('id', id)
         .select()

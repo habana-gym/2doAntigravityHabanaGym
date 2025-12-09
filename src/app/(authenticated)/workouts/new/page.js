@@ -13,7 +13,8 @@ export default function NewWorkoutPage() {
     const [planData, setPlanData] = useState({
         name: '',
         duration: '',
-        level: 'Principiante'
+        level: 'Principiante',
+        description: ''
     });
     const [exercises, setExercises] = useState([]);
     // State now holds detailed objects
@@ -99,6 +100,27 @@ export default function NewWorkoutPage() {
                             onChange={(e) => setPlanData({ ...planData, duration: e.target.value })}
                             placeholder="Ej: 8 semanas"
                         />
+                        <div style={{ gridColumn: '1 / -1' }}>
+                            <label className={styles.label} style={{ marginBottom: '0.5rem', display: 'block' }}>Método de Entrenamiento / Instrucciones</label>
+                            <textarea
+                                value={planData.description}
+                                onChange={(e) => setPlanData({ ...planData, description: e.target.value })}
+                                className=""
+                                placeholder="Ej: Fase excéntrica lenta (3s), descanso activo entre series..."
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    backgroundColor: 'var(--color-bg-surface, #1f2937)',
+                                    border: '1px solid var(--color-border, #374151)',
+                                    color: 'var(--color-text-main, #fff)',
+                                    height: '100px',
+                                    paddingTop: '0.5rem',
+                                    resize: 'vertical',
+                                    fontFamily: 'inherit'
+                                }}
+                            />
+                        </div>
                         <div className={styles.selectGroup}>
                             <label className={styles.label}>Nivel</label>
                             <select

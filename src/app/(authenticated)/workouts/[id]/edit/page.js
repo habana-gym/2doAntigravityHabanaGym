@@ -14,7 +14,8 @@ export default function EditWorkoutPage() {
     const [planData, setPlanData] = useState({
         name: '',
         duration: '',
-        level: 'Principiante'
+        level: 'Principiante',
+        description: ''
     });
     const [exercises, setExercises] = useState([]);
     const [selectedExercises, setSelectedExercises] = useState([]);
@@ -33,7 +34,8 @@ export default function EditWorkoutPage() {
                 setPlanData({
                     name: plan.name,
                     duration: plan.duration,
-                    level: plan.level
+                    level: plan.level,
+                    description: plan.description || ''
                 });
 
                 // Pre-fill Exercises
@@ -128,6 +130,26 @@ export default function EditWorkoutPage() {
                             onChange={(e) => setPlanData({ ...planData, duration: e.target.value })}
                             placeholder="Ej: 8 semanas"
                         />
+
+                        <div style={{ gridColumn: '1 / -1' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Método de Entrenamiento / Instrucciones</label>
+                            <textarea
+                                value={planData.description}
+                                onChange={(e) => setPlanData({ ...planData, description: e.target.value })}
+                                placeholder="Ej: Fase excéntrica lenta (3s), descanso activo entre series..."
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    backgroundColor: 'var(--color-bg-surface, #1f2937)',
+                                    border: '1px solid var(--color-border, #374151)',
+                                    color: 'var(--color-text-main, #fff)',
+                                    minHeight: '100px',
+                                    fontFamily: 'inherit'
+                                }}
+                            />
+                        </div>
+
                         <div className={styles.selectGroup}>
                             <label className={styles.label}>Nivel</label>
                             <select
