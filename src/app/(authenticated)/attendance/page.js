@@ -12,6 +12,7 @@ export default function AttendancePage() {
     const [lastCheckin, setLastCheckin] = useState(null);
     const [error, setError] = useState(null);
     const [graceDays, setGraceDays] = useState(5); // Default
+    const [isInputFocused, setIsInputFocused] = useState(false);
     const inputRef = useRef(null);
 
     // Load Settings & Focus
@@ -46,7 +47,9 @@ export default function AttendancePage() {
 
         const currentId = inputId;
         setInputId(''); // Clear immediately for next scan
-        inputRef.current?.focus();
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
 
         try {
             // 1. Find client 
@@ -111,7 +114,8 @@ export default function AttendancePage() {
                     timestamp: new Date().toLocaleTimeString(),
                     accessGranted,
                     statusMessage,
-                    isGracePeriod: diffDays > 0 && diffDays <= graceDays
+                    isGracePeriod: diffDays > 0 && diffDays <= graceDays,
+                    photoUrl: client.photo_url // Add photo URL
                 });
                 setError(null);
             } else {
@@ -144,16 +148,30 @@ export default function AttendancePage() {
                             className={styles.input}
                             value={inputId}
                             onChange={(e) => setInputId(e.target.value)}
+                            onFocus={() => setIsInputFocused(true)}
+                            onBlur={() => setIsInputFocused(false)}
                             autoFocus
                             autoComplete="off"
                         />
+                        {!isInputFocused && (
+                            <div
+                                className={styles.focusOverlay}
+                                onClick={() => inputRef.current?.focus()}
+                            >
+                                <p>⚠️ Lector Inactivo</p>
+                                <span>Haga clic para activar</span>
+                            </div>
+                        )}
                         <Button type="submit" variant="primary" className={styles.submitBtn}>
                             Marcar
                         </Button>
                     </form>
-                    <div className={styles.qrPlaceholder}>
+                    <div className={styles.qrPlaceholder} onClick={() => inputRef.current?.focus()}>
                         <div className={styles.qrIcon}>👆</div>
                         <p>Coloque el dedo en el lector</p>
+                        <small style={{ color: isInputFocused ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                            {isInputFocused ? '• Sistema Listo' : '• Haga clic aquí'}
+                        </small>
                     </div>
                 </Card>
 
@@ -175,6 +193,15 @@ export default function AttendancePage() {
                             </p>
 
                             <div className={styles.alertBox} style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem', borderRadius: '8px', marginTop: '1rem' }}>
+
+                                {lastCheckin.photoUrl && (
+                                    <img
+                                        src={lastCheckin.photoUrl}
+                                        alt="Foto del Cliente"
+                                        className={styles.clientPhoto}
+                                    />
+                                )}
+
                                 <p style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{lastCheckin.statusMessage}</p>
                                 <p>Vencimiento: {new Date(lastCheckin.endDate).toLocaleDateString()}</p>
                             </div>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import PageHeader from '@/components/layout/PageHeader';
-import { getClients } from '@/services/api';
+import { getClients, getSettings } from '@/services/api';
 import styles from './page.module.css';
 
 export default function ClientsPage() {
@@ -13,12 +13,19 @@ export default function ClientsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('all');
     const [loading, setLoading] = useState(true);
+    const [graceDays, setGraceDays] = useState(5);
 
     useEffect(() => {
         const loadClients = async () => {
             try {
-                const data = await getClients();
+                const [data, settings] = await Promise.all([
+                    getClients(),
+                    getSettings()
+                ]);
                 setClients(data);
+                if (settings && settings.inactive_grace_days) {
+                    setGraceDays(parseInt(settings.inactive_grace_days, 10));
+                }
             } catch (error) {
                 console.error('Error loading clients:', error);
             } finally {
@@ -125,8 +132,21 @@ export default function ClientsPage() {
                                     </td>
                                     <td>
                                         <span className={`${styles.statusBadge} ${styles[client.status]}`}>
-                                            {client.status === 'active' ? 'Activo' :
-                                                client.status === 'debtor' ? 'Deudor' : 'Inactivo'}
+                                            {(() => {
+                                                if (client.status === 'debtor') return 'Deudor';
+                                                if (client.status === 'inactive') return 'Inactivo';
+
+                                                const endDate = new Date(client.end_date);
+                                                const today = new Date();
+                                                today.setHours(0, 0, 0, 0);
+                                                endDate.setHours(0, 0, 0, 0);
+                                                const diffTime = today - endDate;
+                                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                                if (diffDays <= 0) return 'Activo';
+                                                if (diffDays <= graceDays) return 'Gracia';
+                                                return 'Vencido';
+                                            })()}
                                         </span>
                                     </td>
                                     <td>{client.membership_type}</td>

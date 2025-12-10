@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
+import WebcamCapture from '@/components/ui/WebcamCapture';
 import { getClientById, updateClient, getClients } from '@/services/api'; // Reusing API
 import styles from './page.module.css'; // We'll reuse the same styles or creating a new one if needed. Let's assume we can import from neighbor or just inline for now to avoid issues, or better, copy the styles to a new module.
 
@@ -26,6 +27,7 @@ export default function EditClientPage({ params }) {
         notes: '',
         medicalNotes: ''
     });
+    const [capturedPhoto, setCapturedPhoto] = useState(null);
 
     // We don't necessarily need to edit Membership/Plan here as that's handled in the detail view actions usually, 
     // but user wanted to edit phone/cedula mostly.
@@ -51,6 +53,7 @@ export default function EditClientPage({ params }) {
                     cedula: clientData.cedula || '',
                     medicalNotes: clientData.medical_notes || ''
                 });
+                setCapturedPhoto(clientData.photo_url || null);
 
                 setExistingClients(allClients.filter(c => c.id !== id)); // Exclude self for duplicate check
             } catch (error) {
@@ -102,10 +105,12 @@ export default function EditClientPage({ params }) {
                 email: formData.email || null,
                 phone: formData.phone,
                 cedula: formData.cedula,
-                medical_notes: formData.medicalNotes || null
+                cedula: formData.cedula,
+                medical_notes: formData.medicalNotes || null,
+                photo_url: capturedPhoto
             });
             alert('Cliente actualizado con éxito');
-            router.push(`/clients/${id}`);
+            router.push('/clients');
         } catch (error) {
             console.error('Error updating client:', error);
             alert('Error al actualizar: ' + error.message);
@@ -185,6 +190,14 @@ export default function EditClientPage({ params }) {
                                     minHeight: '100px',
                                     fontFamily: 'inherit'
                                 }}
+                            />
+                        </div>
+
+                        {/* Photo Capture Section */}
+                        <div style={{ gridColumn: '1 / -1' }}>
+                            <WebcamCapture
+                                onCapture={(img) => setCapturedPhoto(img)}
+                                initialImage={capturedPhoto}
                             />
                         </div>
                     </div>

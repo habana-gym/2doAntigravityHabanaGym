@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Card from '@/components/ui/Card';
+import AccessPoint from '@/components/dashboard/AccessPoint';
 import PageHeader from '@/components/layout/PageHeader';
 import { getDashboardStats, getRecentActivity, getWeeklyAttendance } from '@/services/api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -38,6 +39,9 @@ export default function DashboardPage() {
     return (
         <div className={styles.dashboard}>
             <PageHeader title="Dashboard" subtitle="Bienvenido a Habana GYM" />
+
+            {/* Access Point Section */}
+            <AccessPoint />
 
             {/* Stats Grid */}
             <div className={styles.statsGrid}>

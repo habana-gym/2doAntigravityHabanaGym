@@ -23,6 +23,19 @@ export const getClientById = async (id) => {
     return data;
 };
 
+export const getClientByCedula = async (cedula) => {
+    // Search by cedula OR fingerprint_id
+    // Note: We use .or() syntax properly for Supabase
+    const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .or(`cedula.eq.${cedula},fingerprint_id.eq.${cedula}`)
+        .maybeSingle(); // Use maybeSingle to avoid 406 error if not found immediately or if multiple matches (though cedula should be unique)
+
+    if (error) throw error;
+    return data;
+};
+
 export const addClient = async (client) => {
     const { data, error } = await supabase
         .from('clients')
@@ -427,4 +440,27 @@ export const getWeeklyAttendance = async () => {
         date: d.day_date,
         asistencias: d.count
     }));
+};
+
+export const getBackupData = async () => {
+    const [clients, payments, memberships, plans, exercises, plan_exercises, settings] = await Promise.all([
+        supabase.from('clients').select('*'),
+        supabase.from('payments').select('*'),
+        supabase.from('memberships').select('*'),
+        supabase.from('plans').select('*'),
+        supabase.from('exercises').select('*'),
+        supabase.from('plan_exercises').select('*'),
+        supabase.from('settings').select('*')
+    ]);
+
+    return {
+        timestamp: new Date().toISOString(),
+        clients: clients.data || [],
+        payments: payments.data || [],
+        memberships: memberships.data || [],
+        plans: plans.data || [],
+        exercises: exercises.data || [],
+        plan_exercises: plan_exercises.data || [],
+        settings: settings.data || []
+    };
 };

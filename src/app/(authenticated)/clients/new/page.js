@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
+import WebcamCapture from '@/components/ui/WebcamCapture';
 import { addClient, getWorkoutPlans, getMemberships, getClients } from '@/services/api';
 import styles from './page.module.css';
 
@@ -25,16 +26,33 @@ export default function NewClientPage() {
     const [fingerprintStep, setFingerprintStep] = useState(0); // 0: Idle, 1: First Scan, 2: Second Scan
     const [tempScan, setTempScan] = useState(''); // Store first scan to compare
     const [scanInput, setScanInput] = useState('');
+    const [capturedPhoto, setCapturedPhoto] = useState(null);
 
     const [existingClients, setExistingClients] = useState([]);
     const [plans, setPlans] = useState([]);
     const [memberships, setMemberships] = useState([]);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isScanFocused, setIsScanFocused] = useState(false);
     const scanInputRef = useRef(null);
+    const [cameraError, setCameraError] = useState(null); // Added for camera error
 
     useEffect(() => {
+        const checkCameraProtocol = () => {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                setCameraError("La cámara requiere acceso seguro (HTTPS o localhost). Si está en red local, necesita configurar SSL.");
+                return false;
+            }
+            return true;
+        };
+
         const loadData = async () => {
+            if (!checkCameraProtocol()) {
+                // If camera protocol check fails, we might still load other data
+                // or decide to stop here depending on criticality.
+                // For now, we'll proceed with data loading but keep the error state.
+            }
+
             try {
                 const [plansData, membershipsData, clientsData] = await Promise.all([
                     getWorkoutPlans(),
@@ -148,8 +166,10 @@ export default function NewClientPage() {
                 debt: selectedMem ? selectedMem.price : 0,
                 status: 'active',
                 debt: selectedMem ? selectedMem.price : 0,
+                debt: selectedMem ? selectedMem.price : 0,
                 plan_id: formData.planId || null,
-                medical_notes: formData.medicalNotes || null
+                medical_notes: formData.medicalNotes || null,
+                photo_url: capturedPhoto || null
             };
 
             await addClient(clientData);
@@ -240,6 +260,14 @@ export default function NewClientPage() {
                             />
                         </div>
 
+                        {/* Photo Capture Section */}
+                        <div style={{ gridColumn: '1 / -1', marginTop: '1rem' }}>
+                            <WebcamCapture
+                                onCapture={(img) => setCapturedPhoto(img)}
+                                initialImage={capturedPhoto}
+                            />
+                        </div>
+
                         {/* Fingerprint Capture Section */}
                         <div className={styles.fingerprintSection} style={{ gridColumn: '1 / -1', border: '1px solid var(--color-border)', padding: '1rem', borderRadius: '8px', marginTop: '1rem' }}>
                             <label className={styles.label}>Huella Digital / ID Biométrico (Opcional)</label>
@@ -255,17 +283,28 @@ export default function NewClientPage() {
                                     <p style={{ marginBottom: '0.5rem', color: 'var(--color-primary)' }}>
                                         {fingerprintStep === 1 ? '👉 Escanee el dedo ahora (1/2)' : '👉 Confirme escaneando nuevamente (2/2)'}
                                     </p>
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <input
-                                            ref={scanInputRef}
-                                            type="text"
-                                            value={scanInput}
-                                            onChange={(e) => setScanInput(e.target.value)}
-                                            onKeyDown={(e) => { if (e.key === 'Enter') handleScan(e); }}
-                                            className={styles.input}
-                                            placeholder="Esperando lector..."
-                                            autoComplete="off"
-                                        />
+                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                        <div style={{ width: '100%' }}>
+                                            <input
+                                                ref={scanInputRef}
+                                                type="text"
+                                                value={scanInput}
+                                                onChange={(e) => setScanInput(e.target.value)}
+                                                onFocus={() => setIsScanFocused(true)}
+                                                onBlur={() => setIsScanFocused(false)}
+                                                onKeyDown={(e) => { if (e.key === 'Enter') handleScan(e); }}
+                                                className={styles.input}
+                                                placeholder="Clic aquí luego escanee..."
+                                                autoComplete="off"
+                                                style={{
+                                                    width: '100%',
+                                                    border: isScanFocused ? '2px solid var(--color-success)' : '2px dashed var(--color-text-muted)'
+                                                }}
+                                            />
+                                            <small style={{ display: 'block', marginTop: '0.25rem', color: isScanFocused ? 'var(--color-success)' : 'var(--color-text-muted)' }}>
+                                                {isScanFocused ? '✅ Listo para escanear' : '👆 Haga clic en la caja para activar el lector'}
+                                            </small>
+                                        </div>
                                         <Button type="button" onClick={handleScan}>Confirmar</Button>
                                     </div>
                                 </div>
@@ -330,6 +369,6 @@ export default function NewClientPage() {
                     </div>
                 </form>
             </Card>
-        </div>
+        </div >
     );
 }

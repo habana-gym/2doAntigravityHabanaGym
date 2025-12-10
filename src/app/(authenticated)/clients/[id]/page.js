@@ -4,8 +4,9 @@ import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import Input from '@/components/ui/Input';
 import WorkoutDetails from '@/components/workouts/WorkoutDetails';
-import { getClientById, updateClient, deleteClient, getWorkoutPlans, addPayment, getClientPayments, getWorkoutPlanById } from '@/services/api';
+import { getClientById, updateClient, deleteClient, getWorkoutPlans, addPayment, getClientPayments, getWorkoutPlanById, getMemberships, getSettings } from '@/services/api';
 import styles from './page.module.css';
 
 export default function ClientDetailPage({ params }) {
@@ -18,21 +19,32 @@ export default function ClientDetailPage({ params }) {
     const [fullPlan, setFullPlan] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedPlan, setSelectedPlan] = useState('');
+    const [memberships, setMemberships] = useState([]);
+    const [showRenewModal, setShowRenewModal] = useState(false);
+    const [selectedMembershipId, setSelectedMembershipId] = useState('');
+    const [renewalStartDate, setRenewalStartDate] = useState('');
+    const [graceDays, setGraceDays] = useState(5); // Default grace days
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [clientData, plansData, paymentsData] = await Promise.all([
+                const [clientData, plansData, paymentsData, membershipsData, settingsData] = await Promise.all([
                     getClientById(id),
                     getWorkoutPlans(),
-                    getClientPayments(id)
+                    getClientPayments(id),
+                    getMemberships(),
+                    getSettings()
                 ]);
                 setClient(clientData);
                 setPlans(plansData);
                 setPayments(paymentsData);
+                setMemberships(membershipsData);
+                if (settingsData && settingsData.inactive_grace_days) {
+                    setGraceDays(parseInt(settingsData.inactive_grace_days));
+                }
+
                 if (clientData.plan_id) {
                     setSelectedPlan(clientData.plan_id);
-                    // Fetch full plan details
                     const planDetails = await getWorkoutPlanById(clientData.plan_id);
                     setFullPlan(planDetails);
                 }
@@ -45,20 +57,78 @@ export default function ClientDetailPage({ params }) {
         loadData();
     }, [id]);
 
-    const handleRenew = async () => {
-        if (!confirm('¿Renovar membresía por 1 mes?')) return;
-
+    const handleRenewClick = () => {
+        // Calculate default start date (Continuous Cycle Logic)
         const currentEnd = new Date(client.end_date);
-        const newEnd = new Date(currentEnd.setMonth(currentEnd.getMonth() + 1));
+        const today = new Date();
+        const baseDate = currentEnd > today ? currentEnd : today;
+
+        setRenewalStartDate(baseDate.toISOString().split('T')[0]);
+        setShowRenewModal(true);
+    };
+
+    const confirmRenewal = async () => {
+        if (!selectedMembershipId) {
+            alert('Por favor selecciona una membresía.');
+            return;
+        }
+
+        const selectedMemDetail = memberships.find(m => m.id === selectedMembershipId);
+        if (!selectedMemDetail) return;
+
+        // Calculate new end date based on Manual Start Date
+        const baseDate = new Date(renewalStartDate);
+        // Correct timezone offset issue by explicitly setting time or using local parts, 
+        // but simplest is just trusting the input string YYYY-MM-DD
+        // Actually new Date('YYYY-MM-DD') is UTC, while new Date() is local. 
+        // Let's use simple adding to the date object which was parsed as UTC-ish or Local
+        // Use a helper to avoid off-by-one errors with dates
+        const parts = renewalStartDate.split('-');
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+
+        let newEnd = new Date(year, month, day);
+
+        if (selectedMemDetail.duration_days) {
+            newEnd.setDate(newEnd.getDate() + selectedMemDetail.duration_days);
+        } else {
+            // Fallback standard 30 days if missing
+            newEnd.setDate(newEnd.getDate() + 30);
+        }
+
+        // Auto-payment logic (Debt doesn't increase, payment recorded)
+        // const newDebt = (client.debt || 0) + selectedMemDetail.price; // OLD Logic
+
+        if (!confirm(`¿Renovar con ${selectedMemDetail.name} por $${selectedMemDetail.price}?
+        \nNueva fecha de vencimiento: ${newEnd.toISOString().split('T')[0]}
+        \nSe registrará el PAGO AUTOMÁTICAMENTE.`)) return;
 
         try {
+            // 1. Record Payment FIRST
+            await addPayment({
+                client_id: id,
+                amount: selectedMemDetail.price,
+                concept: `Renovación: ${selectedMemDetail.name}`,
+                date: new Date().toISOString()
+            });
+
+            // 2. Update Client (Reset debt to 0 since payment is made)
             const updated = await updateClient(id, {
                 status: 'active',
                 end_date: newEnd.toISOString().split('T')[0],
-                debt: 0
+                debt: 0,
+                membership_type: selectedMemDetail.name
             });
+
+            // 3. Refresh Payments List
+            const freshPayments = await getClientPayments(id);
+            setPayments(freshPayments);
+
             setClient({ ...client, ...updated });
-            alert('Membresía renovada con éxito');
+            alert('Membresía renovada y pago registrado con éxito');
+            setShowRenewModal(false);
+            setSelectedMembershipId('');
         } catch (error) {
             console.error('Error renewing:', error);
             alert('Error al renovar');
@@ -99,13 +169,6 @@ export default function ClientDetailPage({ params }) {
                 updatedFullPlan = await getWorkoutPlanById(planIdToUpdate);
             }
 
-            setClient({
-                ...client,
-                ...updated,
-                plans: plans.find(p => p.id === selectedPlan) || null
-            });
-            setFullPlan(updatedFullPlan);
-
             alert('Plan asignado correctamente');
         } catch (error) {
             console.error('Error assigning plan:', error);
@@ -113,43 +176,7 @@ export default function ClientDetailPage({ params }) {
         }
     };
 
-    const handlePayment = async () => {
-        const amountStr = prompt('Ingrese el monto del pago:', '0');
-        if (!amountStr) return;
 
-        const amount = parseFloat(amountStr);
-        if (isNaN(amount) || amount <= 0) {
-            alert('Monto inválido');
-            return;
-        }
-
-        const concept = prompt('Concepto (ej: Cuota Enero):', 'Pago parcial');
-
-        const newDebt = Math.max(0, (client.debt || 0) - amount);
-
-        try {
-            // 1. Update Client Debt
-            const updated = await updateClient(id, { debt: newDebt });
-
-            // 2. Record Payment
-            await addPayment({
-                client_id: id,
-                amount: amount,
-                concept: concept || 'Pago',
-                date: new Date().toISOString()
-            });
-
-            // 3. Refresh local state
-            setClient({ ...client, ...updated });
-            const freshPayments = await getClientPayments(id);
-            setPayments(freshPayments);
-
-            alert(`Pago registrado. Nueva deuda: $${newDebt}`);
-        } catch (error) {
-            console.error('Error registering payment:', error);
-            alert('Error al registrar pago');
-        }
-    };
 
     const handleWhatsApp = () => {
         if (!client.phone) {
@@ -217,12 +244,37 @@ export default function ClientDetailPage({ params }) {
             <div className={styles.grid}>
                 <Card className={styles.profileCard}>
                     <div className={styles.avatarLarge}>
-                        {client.first_name[0]}{client.last_name[0]}
+                        {client.photo_url ? (
+                            <img
+                                src={client.photo_url}
+                                alt={`${client.first_name} ${client.last_name}`}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                        ) : (
+                            `${client.first_name[0]}${client.last_name[0]}`
+                        )}
                     </div>
                     <h1 className={styles.name}>{client.first_name} {client.last_name}</h1>
                     <p className={styles.email}>{client.email}</p>
                     <div className={`${styles.statusBadge} ${styles[client.status]}`}>
-                        {client.status.toUpperCase()}
+                        {(() => {
+                            if (client.status === 'debtor') return 'DEUDOR';
+                            if (client.status === 'inactive') return 'INACTIVO';
+
+                            // Check expiration for Active/Grace
+                            const endDate = new Date(client.end_date);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            endDate.setHours(0, 0, 0, 0);
+
+                            const diffTime = today - endDate;
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                            if (diffDays <= 0) return 'ACTIVO';
+                            if (diffDays <= graceDays) return 'PERIODO DE GRACIA';
+                            return 'VENCIDO';
+                        })()}
+
                     </div>
 
                     <div style={{ marginTop: '1.5rem', width: '100%', textAlign: 'left', backgroundColor: '#000', color: '#FFD700', padding: '1rem', borderRadius: '8px', border: '1px solid #333' }}>
@@ -251,11 +303,8 @@ export default function ClientDetailPage({ params }) {
                         </span>
                     </div>
                     <div className={styles.actions}>
-                        <Button variant="primary" className={styles.fullWidth} onClick={handleRenew}>
-                            Renovar Membresía (+1 Mes)
-                        </Button>
-                        <Button variant="secondary" className={styles.fullWidth} onClick={handlePayment} style={{ marginTop: '0.5rem' }}>
-                            Registrar Pago
+                        <Button variant="primary" className={styles.fullWidth} onClick={handleRenewClick}>
+                            Renovar Membresía
                         </Button>
                     </div>
                 </Card>
@@ -317,6 +366,69 @@ export default function ClientDetailPage({ params }) {
                     )}
                 </Card>
             </div>
-        </div>
+
+            {/* Renewal Modal */}
+            {showRenewModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000
+                }}>
+                    <Card style={{ width: '90%', maxWidth: '400px' }}>
+                        <h2 style={{ color: '#fff', marginBottom: '1rem', marginTop: 0 }}>Renovar Membresía</h2>
+
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label style={{ display: 'block', color: '#aaa', marginBottom: '0.5rem' }}>Selecciona una opción:</label>
+                            <select
+                                value={selectedMembershipId}
+                                onChange={(e) => setSelectedMembershipId(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #333',
+                                    backgroundColor: '#111',
+                                    color: '#fff'
+                                }}
+                            >
+                                <option value="">-- Seleccionar --</option>
+                                {memberships.map(m => (
+                                    <option key={m.id} value={m.id}>
+                                        {m.name} - ${m.price} ({m.duration_days} días)
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <Input
+                                label="Fecha de Inicio"
+                                type="date"
+                                value={renewalStartDate}
+                                onChange={(e) => setRenewalStartDate(e.target.value)}
+                                style={{ backgroundColor: '#111', color: '#fff', border: '1px solid #333' }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <Button variant="secondary" onClick={() => setShowRenewModal(false)} style={{ flex: 1 }}>
+                                Cancelar
+                            </Button>
+                            <Button variant="primary" onClick={confirmRenewal} style={{ flex: 1 }}>
+                                Confirmar
+                            </Button>
+                        </div>
+                    </Card>
+                </div>
+            )
+            }
+        </div >
     );
 }

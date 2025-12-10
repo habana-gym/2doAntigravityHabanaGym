@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import Button from '@/components/ui/Button';
-import { getSettings, updateSetting } from '@/services/api';
+import { getSettings, updateSetting, getBackupData } from '@/services/api';
 import { supabase } from '@/lib/supabase'; // Need supabase client
 import MFAEnrollment from '@/components/security/MFAEnrollment';
 import styles from './page.module.css';
@@ -115,6 +115,22 @@ export default function SettingsPage() {
                 subtitle="Ajusta los parámetros generales y seguridad"
             />
 
+
+            <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Gestión del Gimnasio</h3>
+                <div className={styles.settingRow}>
+                    <div className={styles.settingInfo}>
+                        <label className={styles.settingLabel}>Tipos de Membresía</label>
+                        <p className={styles.settingDesc}>Define los planes, precios y duraciones disponibles.</p>
+                    </div>
+                    <div>
+                        <Button variant="secondary" onClick={() => window.location.href = '/settings/memberships'}>
+                            Gestionar Membresías
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
             <div className={styles.section}>
                 <h3 className={styles.sectionTitle}>Reglas de Negocio</h3>
 
@@ -140,6 +156,40 @@ export default function SettingsPage() {
                     <Button variant="primary" onClick={handleSave} disabled={saving}>
                         {saving ? 'Guardando...' : 'Guardar Reglas'}
                     </Button>
+                </div>
+            </div>
+
+            <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Seguridad y Datos</h3>
+                <div className={styles.settingRow}>
+                    <div className={styles.settingInfo}>
+                        <label className={styles.settingLabel}>Copia de Seguridad</label>
+                        <p className={styles.settingDesc}>
+                            Descarga una copia completa de tu base de datos (Clientes, Pagos, Membresías) en formato .json
+                        </p>
+                    </div>
+                    <div>
+                        <Button variant="primary" onClick={async () => {
+                            if (!confirm('¿Descargar copia de seguridad completa?')) return;
+                            try {
+                                const data = await getBackupData();
+                                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `backup-habanagym-${new Date().toISOString().split('T')[0]}.json`;
+                                document.body.appendChild(a);
+                                a.click();
+                                window.URL.revokeObjectURL(url);
+                                document.body.removeChild(a);
+                            } catch (err) {
+                                console.error(err);
+                                alert('Error al generar la copia de seguridad');
+                            }
+                        }}>
+                            Exportar Copia de Seguridad
+                        </Button>
+                    </div>
                 </div>
             </div>
 

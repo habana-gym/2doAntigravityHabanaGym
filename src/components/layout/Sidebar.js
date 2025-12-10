@@ -9,7 +9,6 @@ const menuItems = [
     { label: 'Clientes', href: '/clients', icon: '👥' },
     { label: 'Entrenamientos', href: '/workouts', icon: '💪' },
     { label: 'Asistencia', href: '/attendance', icon: '📅' },
-    { label: 'Membresías', href: '/settings/memberships', icon: '💳' },
     { label: 'Reportes', href: '/reports', icon: '📈' },
     { label: 'Configuración', href: '/settings', icon: '⚙️' },
 ];
