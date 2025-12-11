@@ -1,5 +1,7 @@
 'use client';
 
+import { supabase } from '@/lib/supabase';
+
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
@@ -23,7 +25,10 @@ export default function ClientDetailPage({ params }) {
     const [showRenewModal, setShowRenewModal] = useState(false);
     const [selectedMembershipId, setSelectedMembershipId] = useState('');
     const [renewalStartDate, setRenewalStartDate] = useState('');
-    const [graceDays, setGraceDays] = useState(5); // Default grace days
+    const [paymentDate, setPaymentDate] = useState('');
+    const [previewEndDate, setPreviewEndDate] = useState(''); // Visual preview
+    const [graceDays, setGraceDays] = useState(5);
+    const [error, setError] = useState(''); // Error state for modal
 
     useEffect(() => {
         const loadData = async () => {
@@ -57,81 +62,132 @@ export default function ClientDetailPage({ params }) {
         loadData();
     }, [id]);
 
+    // Calculate Preview Date whenever inputs change
+    useEffect(() => {
+        if (!renewalStartDate || !selectedMembershipId || memberships.length === 0) {
+            setPreviewEndDate('');
+            return;
+        }
+
+        const selectedMem = memberships.find(m => m.id === selectedMembershipId);
+        if (!selectedMem) return;
+
+        const parts = renewalStartDate.split('-');
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+
+        const end = new Date(year, month, day);
+
+        if (selectedMem.duration_days) {
+            end.setDate(end.getDate() + selectedMem.duration_days);
+        } else {
+            end.setDate(end.getDate() + 30);
+        }
+
+        setPreviewEndDate(end.toISOString().split('T')[0]);
+
+    }, [renewalStartDate, selectedMembershipId, memberships]);
+
     const handleRenewClick = () => {
-        // Calculate default start date (Continuous Cycle Logic)
         const currentEnd = new Date(client.end_date);
         const today = new Date();
         const baseDate = currentEnd > today ? currentEnd : today;
 
         setRenewalStartDate(baseDate.toISOString().split('T')[0]);
+        setPaymentDate(today.toISOString().split('T')[0]);
         setShowRenewModal(true);
     };
 
     const confirmRenewal = async () => {
+        setError('');
+        console.log("Confirming renewal... STARTED");
+
         if (!selectedMembershipId) {
-            alert('Por favor selecciona una membresía.');
+            setError('Por favor selecciona una membresía.');
+            return;
+        }
+
+        if (!renewalStartDate || !paymentDate) {
+            setError('Por favor completa ambas fechas (Inicio y Pago).');
             return;
         }
 
         const selectedMemDetail = memberships.find(m => m.id === selectedMembershipId);
         if (!selectedMemDetail) return;
 
-        // Calculate new end date based on Manual Start Date
-        const baseDate = new Date(renewalStartDate);
-        // Correct timezone offset issue by explicitly setting time or using local parts, 
-        // but simplest is just trusting the input string YYYY-MM-DD
-        // Actually new Date('YYYY-MM-DD') is UTC, while new Date() is local. 
-        // Let's use simple adding to the date object which was parsed as UTC-ish or Local
-        // Use a helper to avoid off-by-one errors with dates
-        const parts = renewalStartDate.split('-');
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[2], 10);
-
-        let newEnd = new Date(year, month, day);
-
-        if (selectedMemDetail.duration_days) {
-            newEnd.setDate(newEnd.getDate() + selectedMemDetail.duration_days);
-        } else {
-            // Fallback standard 30 days if missing
-            newEnd.setDate(newEnd.getDate() + 30);
-        }
-
-        // Auto-payment logic (Debt doesn't increase, payment recorded)
-        // const newDebt = (client.debt || 0) + selectedMemDetail.price; // OLD Logic
-
-        if (!confirm(`¿Renovar con ${selectedMemDetail.name} por $${selectedMemDetail.price}?
-        \nNueva fecha de vencimiento: ${newEnd.toISOString().split('T')[0]}
-        \nSe registrará el PAGO AUTOMÁTICAMENTE.`)) return;
-
         try {
-            // 1. Record Payment FIRST
-            await addPayment({
+            const parts = renewalStartDate.split('-');
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+
+            let newEnd = new Date(year, month, day);
+
+            if (selectedMemDetail.duration_days) {
+                newEnd.setDate(newEnd.getDate() + selectedMemDetail.duration_days);
+            } else {
+                newEnd.setDate(newEnd.getDate() + 30);
+            }
+
+            const paymentDateObj = new Date(paymentDate);
+            paymentDateObj.setHours(12, 0, 0, 0);
+
+            if (isNaN(newEnd.getTime()) || isNaN(paymentDateObj.getTime())) {
+                setError('Fechas inválidas. Por favor verifícalas.');
+                return;
+            }
+
+            console.log("Values to save:", {
                 client_id: id,
                 amount: selectedMemDetail.price,
                 concept: `Renovación: ${selectedMemDetail.name}`,
-                date: new Date().toISOString()
+                date: paymentDateObj.toISOString(),
+                new_end_date: newEnd.toISOString()
             });
 
-            // 2. Update Client (Reset debt to 0 since payment is made)
+            // REMOVED NATIVE CONFIRM DIALOG to prevent browser blocking issues
+
+            // 1. Record Payment
+            console.log("Attempting to insert payment...");
+            const { error: paymentError } = await supabase
+                .from('payments')
+                .insert([{
+                    client_id: id,
+                    amount: selectedMemDetail.price,
+                    concept: `Renovación: ${selectedMemDetail.name}`,
+                    date: paymentDateObj.toISOString()
+                }]);
+
+            if (paymentError) {
+                console.error("Payment Error:", paymentError);
+                throw new Error(`Error en Pago: ${paymentError.message} (Code: ${paymentError.code})`);
+            }
+            console.log("Payment inserted successfully.");
+
+            // 2. Update Client
+            console.log("Attempting to update client...");
             const updated = await updateClient(id, {
                 status: 'active',
                 end_date: newEnd.toISOString().split('T')[0],
                 debt: 0,
                 membership_type: selectedMemDetail.name
             });
+            console.log("Client updated successfully.");
 
             // 3. Refresh Payments List
             const freshPayments = await getClientPayments(id);
             setPayments(freshPayments);
 
             setClient({ ...client, ...updated });
-            alert('Membresía renovada y pago registrado con éxito');
+            alert('¡Renovación exitosa!');
             setShowRenewModal(false);
             setSelectedMembershipId('');
         } catch (error) {
-            console.error('Error renewing:', error);
-            alert('Error al renovar');
+            console.error('CRITICAL Error renewing:', error);
+            const msg = `Error al guardar: ${error.message || 'Desconocido'}`;
+            setError(msg);
+            alert(msg); // Force alert in case UI is stuck
         }
     };
 
@@ -384,6 +440,20 @@ export default function ClientDetailPage({ params }) {
                     <Card style={{ width: '90%', maxWidth: '400px' }}>
                         <h2 style={{ color: '#fff', marginBottom: '1rem', marginTop: 0 }}>Renovar Membresía</h2>
 
+                        {error && (
+                            <div style={{
+                                backgroundColor: 'rgba(220, 38, 38, 0.2)',
+                                border: '1px solid #ef4444',
+                                color: '#fca5a5',
+                                padding: '0.75rem',
+                                borderRadius: '6px',
+                                marginBottom: '1rem',
+                                fontSize: '0.9rem'
+                            }}>
+                                ⚠ {error}
+                            </div>
+                        )}
+
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label style={{ display: 'block', color: '#aaa', marginBottom: '0.5rem' }}>Selecciona una opción:</label>
                             <select
@@ -409,13 +479,32 @@ export default function ClientDetailPage({ params }) {
 
                         <div style={{ marginBottom: '1.5rem' }}>
                             <Input
-                                label="Fecha de Inicio"
+                                label="Fecha de Inicio (Membresía)"
                                 type="date"
                                 value={renewalStartDate}
                                 onChange={(e) => setRenewalStartDate(e.target.value)}
                                 style={{ backgroundColor: '#111', color: '#fff', border: '1px solid #333' }}
                             />
                         </div>
+
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <Input
+                                label="Fecha de PAGO (Registro Contable)"
+                                type="date"
+                                value={paymentDate}
+                                onChange={(e) => setPaymentDate(e.target.value)}
+                                style={{ backgroundColor: '#111', color: '#fff', border: '1px solid #333' }}
+                            />
+                        </div>
+
+                        {previewEndDate && (
+                            <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#333', borderRadius: '8px', border: '1px solid #444' }}>
+                                <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.2rem' }}>Nueva Fecha de Vencimiento Estimada:</label>
+                                <strong style={{ color: '#4ADE80', fontSize: '1.2rem' }}>
+                                    {previewEndDate.split('-').reverse().join('/')}
+                                </strong>
+                            </div>
+                        )}
 
                         <div style={{ display: 'flex', gap: '1rem' }}>
                             <Button variant="secondary" onClick={() => setShowRenewModal(false)} style={{ flex: 1 }}>

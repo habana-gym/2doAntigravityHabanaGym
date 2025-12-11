@@ -1,17 +1,13 @@
 'use client';
 
-import { use, useState, useEffect, useRef } from 'react';
+import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import WebcamCapture from '@/components/ui/WebcamCapture';
-import { getClientById, updateClient, getClients } from '@/services/api'; // Reusing API
-import styles from './page.module.css'; // We'll reuse the same styles or creating a new one if needed. Let's assume we can import from neighbor or just inline for now to avoid issues, or better, copy the styles to a new module.
-
-// Actually, I'll use the same structure but since CSS modules are scoped, I should probably copy the css content or reuse the class names if global. 
-// For now, I'll copy the styles concept or just referencing the same CSS file is not possible directly if it's a module in another folder without adjusting paths.
-// I will assume I need to create `page.module.css` for this folder too or just use the same classes if I copy the file. 
+import FingerprintManager from '@/components/clients/FingerprintManager';
+import { getClientById, updateClient, getClients } from '@/services/api';
 
 export default function EditClientPage({ params }) {
     const router = useRouter();
@@ -24,14 +20,12 @@ export default function EditClientPage({ params }) {
         email: '',
         phone: '',
         cedula: '',
+        fingerprintId: '',
         notes: '',
         medicalNotes: ''
     });
+
     const [capturedPhoto, setCapturedPhoto] = useState(null);
-
-    // We don't necessarily need to edit Membership/Plan here as that's handled in the detail view actions usually, 
-    // but user wanted to edit phone/cedula mostly.
-
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
@@ -51,11 +45,12 @@ export default function EditClientPage({ params }) {
                     email: clientData.email || '',
                     phone: clientData.phone || '',
                     cedula: clientData.cedula || '',
+                    fingerprintId: clientData.fingerprint_id || '',
                     medicalNotes: clientData.medical_notes || ''
                 });
                 setCapturedPhoto(clientData.photo_url || null);
 
-                setExistingClients(allClients.filter(c => c.id !== id)); // Exclude self for duplicate check
+                setExistingClients(allClients.filter(c => c.id !== id));
             } catch (error) {
                 console.error('Error loading client:', error);
                 alert('Error al cargar datos del cliente');
@@ -105,7 +100,7 @@ export default function EditClientPage({ params }) {
                 email: formData.email || null,
                 phone: formData.phone,
                 cedula: formData.cedula,
-                cedula: formData.cedula,
+                fingerprint_id: formData.fingerprintId || null,
                 medical_notes: formData.medicalNotes || null,
                 photo_url: capturedPhoto
             });
@@ -147,59 +142,78 @@ export default function EditClientPage({ params }) {
                             error={errors.lastName}
                             required
                         />
-                        <Input
-                            label="Cédula / DNI"
-                            name="cedula"
-                            value={formData.cedula}
-                            onChange={handleChange}
-                            error={errors.cedula}
-                            required
-                        />
-                        <Input
-                            label="Teléfono"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            error={errors.phone}
-                            required
-                            placeholder="Ej: 54911..."
-                        />
-                        <Input
-                            label="Email (Opcional)"
-                            name="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            error={errors.email}
-                        />
+                    </div>
 
-                        <div style={{ gridColumn: '1 / -1' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Observaciones Médicas / Físicas</label>
-                            <textarea
-                                name="medicalNotes"
-                                value={formData.medicalNotes}
+                    {/* Custom Layout: Left Column (Data) | Right Column (Fingerprint) */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', alignItems: 'start' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <Input
+                                label="Cédula / DNI"
+                                name="cedula"
+                                value={formData.cedula}
                                 onChange={handleChange}
-                                placeholder="Ej: Lesión de rodilla, hipertensión..."
-                                style={{
-                                    width: '100%',
-                                    padding: '0.75rem',
-                                    borderRadius: '8px',
-                                    backgroundColor: 'var(--color-bg-surface, #1f2937)',
-                                    border: '1px solid var(--color-border, #374151)',
-                                    color: 'var(--color-text-main, #fff)',
-                                    minHeight: '100px',
-                                    fontFamily: 'inherit'
-                                }}
+                                error={errors.cedula}
+                                required
+                            />
+                            <Input
+                                label="Teléfono"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                error={errors.phone}
+                                required
+                                placeholder="Ej: 54911..."
+                            />
+                            <Input
+                                label="Email (Opcional)"
+                                name="email"
+                                type="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                error={errors.email}
                             />
                         </div>
 
-                        {/* Photo Capture Section */}
-                        <div style={{ gridColumn: '1 / -1' }}>
-                            <WebcamCapture
-                                onCapture={(img) => setCapturedPhoto(img)}
-                                initialImage={capturedPhoto}
+                        {/* Fingerprint centered in the right column */}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: '100%',
+                            paddingTop: '1rem'
+                        }}>
+                            <FingerprintManager
+                                value={formData.fingerprintId}
+                                onChange={(code) => setFormData(prev => ({ ...prev, fingerprintId: code }))}
                             />
                         </div>
+                    </div>
+
+                    <div style={{ marginTop: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Observaciones Médicas / Físicas</label>
+                        <textarea
+                            name="medicalNotes"
+                            value={formData.medicalNotes}
+                            onChange={handleChange}
+                            placeholder="Ej: Lesión de rodilla, hipertensión..."
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem',
+                                borderRadius: '8px',
+                                backgroundColor: 'var(--color-bg-surface, #1f2937)',
+                                border: '1px solid var(--color-border, #374151)',
+                                color: 'var(--color-text-main, #fff)',
+                                minHeight: '100px',
+                                fontFamily: 'inherit'
+                            }}
+                        />
+                    </div>
+
+                    <div>
+                        <WebcamCapture
+                            onCapture={(img) => setCapturedPhoto(img)}
+                            initialImage={capturedPhoto}
+                        />
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
