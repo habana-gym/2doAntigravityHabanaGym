@@ -1,24 +1,44 @@
-PASOS PARA ACTUALIZAR E INICIAR EL SISTEMA (EN EL GIMNASIO)
+GUÍA COMPLETA: INSTALACIÓN Y ACTUALIZACIÓN EN EL GIMNASIO
 
-1. Abrir una terminal (PowerShell o CMD).
+===============================================================
+OPCIÓN A: SI ES LA PRIMERA VEZ (Nunca has bajado el sistema aquí)
+===============================================================
 
-2. Navegar a la carpeta del proyecto (donde sea que esté guardada en esa PC):
-   Ejemplo: cd Documents\perihelion-galaxy
+1. PREPARAR LA COMPUTADORA (Solo se hace una vez en la vida):
+   - Descargar e Instalar "Node.js" (versión LTS) desde: https://nodejs.org/
+   - Descargar e Instalar "Git" desde: https://git-scm.com/
+   (Dale "Siguiente" a todo en las instalaciones).
 
-3. BAJAR LAS ACTUALIZACIONES (Importante):
+2. DESCARGAR EL PROYECTO:
+   - Crea una carpeta donde quieras guardarlo (ej: "SISTEMA_GYM" en Documentos).
+   - Entra a esa carpeta.
+   - En la barra de dirección de arriba, escribe `cmd` y dale Enter.
+   - En la pantalla negra escribe:
+     git clone https://github.com/habana-gym/2doAntigravityHabanaGym.git .
+     (¡Ojo con el punto al final! sirve para que se baje ahí mismo).
+
+3. INSTALAR LIBRERÍAS:
+   - Escribe: npm install
+
+4. ARRANCAR:
+   - Escribe: npm run dev
+
+===============================================================
+OPCIÓN B: SI YA LO TIENES Y SOLO QUIERES ACTUALIZAR
+===============================================================
+
+1. Abrir la terminal dentro de la carpeta del proyecto (truco de escribir `cmd` en la barra).
+
+2. BAJAR LAS ACTUALIZACIONES:
    git pull
 
-   *Nota: Si pregunta por usuario/contraseña y no funciona, avísame.
-
-4. INSTALAR DEPENDENCIAS (Solo si es la primera vez o si agregamos librerías nuevas):
-   npm install
-
-5. INICIAR EL SISTEMA:
+3. ARRANCAR:
    npm run dev
 
-6. ABRIR EN EL NAVEGADOR:
-   http://localhost:3002
+===============================================================
+NOTAS FINALES
+===============================================================
+- Dirección web para entrar: http://localhost:3002
+- Para apagarlo: Ctrl + C en la terminal.
+- Si usas Vercel (la web), no necesitas hacer nada de esto, solo refrescar la página (aunque a veces tarda unos minutos en actualizarse solo).
 
-NOTAS:
-- Para detener el sistema, presiona Ctrl + C en la terminal.
-- Si hay errores rojos en la terminal, toma una foto o copialos para revisarlos.
