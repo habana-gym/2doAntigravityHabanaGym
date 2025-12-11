@@ -6,9 +6,11 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import PageHeader from '@/components/layout/PageHeader';
 import { getClients, getSettings } from '@/services/api';
+import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
 export default function ClientsPage() {
+    const router = useRouter();
     const [clients, setClients] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('all');
@@ -78,25 +80,25 @@ export default function ClientsPage() {
                             className={`${styles.filterBtn} ${filter === 'all' ? styles.activeFilter : ''}`}
                             onClick={() => setFilter('all')}
                         >
-                            Todos
+                            Todos ({clients.length})
                         </button>
                         <button
                             className={`${styles.filterBtn} ${filter === 'active' ? styles.activeFilter : ''}`}
                             onClick={() => setFilter('active')}
                         >
-                            Activos
+                            Activos ({clients.filter(c => c.status === 'active').length})
                         </button>
                         <button
                             className={`${styles.filterBtn} ${filter === 'debtor' ? styles.activeFilter : ''}`}
                             onClick={() => setFilter('debtor')}
                         >
-                            Deudores
+                            Deudores ({clients.filter(c => c.status === 'debtor').length})
                         </button>
                         <button
                             className={`${styles.filterBtn} ${filter === 'inactive' ? styles.activeFilter : ''}`}
                             onClick={() => setFilter('inactive')}
                         >
-                            Inactivos
+                            Inactivos ({clients.filter(c => c.status === 'inactive').length})
                         </button>
                     </div>
                 </div>
@@ -118,7 +120,13 @@ export default function ClientsPage() {
                         </thead>
                         <tbody>
                             {filteredClients.map((client) => (
-                                <tr key={client.id} className={styles.row}>
+                                <tr
+                                    key={client.id}
+                                    className={styles.row}
+                                    onDoubleClick={() => router.push(`/clients/${client.id}`)}
+                                    title="Doble click para ver detalles"
+                                    style={{ cursor: 'pointer' }}
+                                >
                                     <td>
                                         <div className={styles.clientName}>
                                             <div className={styles.avatar}>
@@ -161,9 +169,38 @@ export default function ClientsPage() {
                                     </td>
                                     <td>
                                         <div className={styles.actions}>
-                                            <Link href={`/clients/${client.id}`}>
-                                                <Button variant="ghost" className={styles.actionBtn}>Ver</Button>
-                                            </Link>
+                                            <Button
+                                                variant="ghost"
+                                                className={styles.actionBtn}
+                                                onClick={() => {
+                                                    // Format phone: remove non-numeric, ensure 598 prefix if missing
+                                                    let phone = client.phone.replace(/\D/g, '');
+                                                    if (phone.startsWith('09')) phone = '598' + phone.substring(1);
+                                                    if (!phone.startsWith('598') && phone.length === 8) phone = '598' + phone;
+
+                                                    // Custom message based on status
+                                                    let text = `Hola ${client.first_name}, te escribimos de Habana Gym.`;
+                                                    if (client.status === 'debtor') {
+                                                        text += ` Te recordamos que tu mensualidad venció el ${new Date(client.end_date).toLocaleDateString()}. Por favor, regulariza tu pago cuando puedas. ¡Gracias!`;
+                                                    } else if (client.status === 'inactive') {
+                                                        text += ` Hace tiempo no te vemos. ¿Te gustaría reactivar tu entrenamiento?`;
+                                                    }
+
+                                                    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+                                                }}
+                                                title="Enviar WhatsApp"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24"
+                                                    width="28"
+                                                    height="28"
+                                                    style={{ display: 'block', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                                                >
+                                                    <path fill="#25D366" d="M12.04 2c-5.522 0-9.999 4.477-9.999 9.999 0 2.15.697 4.148 1.876 5.792L2 22l4.288-1.896c1.597 1.129 3.528 1.896 5.752 1.896 5.522 0 10-4.477 10-9.999S17.562 2 12.04 2z" />
+                                                    <path fill="#fff" d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.592 2.654-.696c1.005.572 1.903.887 2.806.887l.001-.001c3.181-.001 5.767-2.587 5.767-5.766.001-3.185-2.585-5.77-5.768-5.77zm0 10.155c-.812 0-1.608-.262-2.308-.669l-.168-.1-.956.255.254-.93-.105-.172c-.443-.706-.708-1.517-.707-2.772 0-2.457 2.001-4.455 4.455-4.455 2.453 0 4.454 1.999 4.454 4.455.001 2.46-2.001 4.458-4.919 4.388zm2.465-3.32c-.135-.067-.798-.387-.923-.432-.124-.044-.213-.067-.302.068-.089.134-.344.433-.422.522-.078.089-.156.1-.289.034-.134-.067-.565-.208-1.077-.663-.402-.357-.674-.799-.752-.933-.079-.134-.008-.206.059-.273.061-.061.134-.156.201-.234.067-.078.089-.133.134-.223.045-.089.022-.167-.011-.233-.033-.067-.302-.727-.413-1.002-.109-.267-.219-.231-.302-.235l-.257-.005c-.089 0-.234.034-.356.167-.123.133-.467.455-.467 1.111 0 .656.478 1.289.544 1.378.067.089 1.884 2.866 4.545 4.026.634.276 1.13.441 1.516.564.646.205 1.234.175 1.696.107.514-.076 1.574-.643 1.796-1.264.223-.621.223-1.154.156-1.265-.067-.111-.245-.178-.38-.245z" />
+                                                </svg>
+                                            </Button>
                                         </div>
                                     </td>
                                 </tr>
