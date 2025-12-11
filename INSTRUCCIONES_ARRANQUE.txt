@@ -1,16 +1,24 @@
-PASOS PARA INICIAR EL SISTEMA HABANA GYM
+PASOS PARA ACTUALIZAR E INICIAR EL SISTEMA (EN EL GIMNASIO)
 
 1. Abrir una terminal (PowerShell o CMD).
 
-2. Navegar a la carpeta del proyecto:
-   cd c:\Users\haban\.gemini\antigravity\playground\perihelion-galaxy
+2. Navegar a la carpeta del proyecto (donde sea que esté guardada en esa PC):
+   Ejemplo: cd Documents\perihelion-galaxy
 
-3. Ejecutar el comando de inicio:
+3. BAJAR LAS ACTUALIZACIONES (Importante):
+   git pull
+
+   *Nota: Si pregunta por usuario/contraseña y no funciona, avísame.
+
+4. INSTALAR DEPENDENCIAS (Solo si es la primera vez o si agregamos librerías nuevas):
+   npm install
+
+5. INICIAR EL SISTEMA:
    npm run dev
 
-4. Una vez que diga "calentando" o "ready", abrir el navegador en:
+6. ABRIR EN EL NAVEGADOR:
    http://localhost:3002
 
 NOTAS:
-- Si el puerto 3002 está ocupado, puede fallar. Asegúrate de no tener otra terminal corriendo lo mismo.
 - Para detener el sistema, presiona Ctrl + C en la terminal.
+- Si hay errores rojos en la terminal, toma una foto o copialos para revisarlos.
